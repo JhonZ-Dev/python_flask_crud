@@ -48,21 +48,74 @@ def product_by_id(id_producto):
     except Exception as es:
         return jsonify({'mensaje': "Error"})    
 
-#registrar product
 @app.route('/api/register', methods=['POST'])
 def registrar_producto():
     try:
+        # Obtener los datos del producto desde el request JSON
+        data = request.get_json()
+        id_producto = data['id_producto']
+        nombreproducto = data['nombreproducto']
+        precioproducto = data['precioproducto']
+        detalleproducto = data['detalleproducto']
+        ivaproducto = data['ivaproducto']
+        preciototal = data['preciototal']
+        fechaactualizacion = data['fechaactualizacion']
+        fechacreacion = data['fechacreacion']
+        urlImagen = data['urlImagen']
+        sistema = data['sistema']
+
         cursor = conexion.connection.cursor()
-        sql = """INSERT INTO product (id_producto,nombreproducto,precioproducto, detalleproducto,ivaproducto, preciototal,fechaactualizacion,fechacreacion,urlImagen,sistema)
-                 VALUES({0},'{1}',{2},'{3}',{4},{5},'{6}','{7}','{8}','{9}')""".format(request.json['id_producto'],request.json['nombreproducto'])
-        cursor.execute(sql)
+        sql = """INSERT INTO product (id_producto, nombreproducto, precioproducto, detalleproducto, ivaproducto, preciototal, fechaactualizacion, fechacreacion, urlImagen, sistema)
+                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+        cursor.execute(sql, (id_producto, nombreproducto, precioproducto, detalleproducto, ivaproducto, preciototal, fechaactualizacion, fechacreacion, urlImagen, sistema))
         conexion.connection.commit()
-        return jsonify({"mensaje":"Producto Registrador"})
 
-    except Exception as es:
-        print(es)
-        return jsonify({'mensaje': "Error"}) 
+        return jsonify({"mensaje": "Producto Registrado"})
 
+    except Exception as e:
+        print(f"Error: {e}")
+        return jsonify({'mensaje': "Error al registrar producto"}), 500
+
+    finally:
+        cursor.close()
+
+#metodo para editar
+@app.route('/api/update/<int:id_producto>', methods=['PUT'])
+def actualizar_producto(id_producto):
+    try:
+        # Obtener los datos del producto desde el request JSON
+        data = request.get_json()
+        nombreproducto = data['nombreproducto']
+        precioproducto = data['precioproducto']
+        detalleproducto = data['detalleproducto']
+        ivaproducto = data['ivaproducto']
+        preciototal = data['preciototal']
+        fechaactualizacion = data['fechaactualizacion']
+        urlImagen = data['urlImagen']
+        sistema = data['sistema']
+
+        cursor = conexion.connection.cursor()
+        sql = """UPDATE product SET 
+                 nombreproducto = %s,
+                 precioproducto = %s,
+                 detalleproducto = %s,
+                 ivaproducto = %s,
+                 preciototal = %s,
+                 fechaactualizacion = %s,
+                 urlImagen = %s,
+                 sistema = %s
+                 WHERE id_producto = %s"""
+        cursor.execute(sql, (nombreproducto, precioproducto, detalleproducto, ivaproducto, preciototal, fechaactualizacion, urlImagen, sistema, id_producto))
+        conexion.connection.commit()
+
+        return jsonify({"mensaje": "Producto Actualizado"})
+
+    except Exception as e:
+        print(f"Error: {e}")
+        return jsonify({'mensaje': "Error al actualizar producto"}), 500
+
+    finally:
+        cursor.close()
 
 #mensaje para cuando se accede a la página correcta
 def pagina_no_encontrada(error):
