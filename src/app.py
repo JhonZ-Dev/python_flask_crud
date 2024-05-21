@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, jsonify
 from config import config
 from flask_mysqldb import MySQL
 
@@ -18,12 +18,16 @@ def listar_productos():
         sql = "SELECT * FROM product"
         cursor.execute(sql)
         datos = cursor.fetchall()
-        print(datos)
-        return "Listados"
-
-
+        #print(datos)
+        productos = []
+        for fila in datos:
+            producto={'id_producto':fila[0],'nombreproducto':fila[1], 'precioproducto':fila[2], 'detalleproducto':fila[3],
+                      'ivaproducto':fila[4], 'preciototal':fila[5], 'fechaactualizacion':fila[6], 'fechacreacion':fila[7],
+                      'urlImagen':fila[8], 'sistema':fila[9]}
+            productos.append(producto)
+        return jsonify({'productos': productos, 'mensaje': "Productos Listados"})
     except Exception as es:
-        return "Error"    
+        return jsonify({'mensaje': "Error"})    
 
 
 
